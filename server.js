@@ -2,17 +2,23 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const MongoClient = require('mongodb').MongoClient;
 
+//Create an instance of the Express app and specify the port number 
+//(3000) that the server will listen on.
 const app = express();
 const port = 3000;
 
+//'bodyParser.json()' middleware to parse JSON data from incoming requests.
 app.use(bodyParser.json());
 
-// Database connection
+//Database connection
+//Set up a connection to the MongoDB database.
 const url = 'mongodb://localhost:27017';
 const dbName = 'polling_system';
 
 let db;
 
+//If connection work successfully, we store the reference to the 
+//database in the 'db' variable for later use.
 MongoClient.connect(url, (err, client) => {
   if (err) {
     console.error('Error connecting to database:', err);
@@ -22,7 +28,7 @@ MongoClient.connect(url, (err, client) => {
   db = client.db(dbName);
 });
 
-// API routes
+// API route for create a New Poll
 app.post('/polls', (req, res) => {
   const { question, options } = req.body;
   const poll = { question, options, votes: {} };
@@ -37,6 +43,7 @@ app.post('/polls', (req, res) => {
   });
 });
 
+// This api route for vote on a Poll
 app.post('/polls/:id/vote', (req, res) => {
   const pollId = req.params.id;
   const { option } = req.body;
@@ -51,6 +58,8 @@ app.post('/polls/:id/vote', (req, res) => {
       res.status(404).send('Poll not found');
       return;
     }
+
+    // This api route for Update Vote Count
     if (!poll.votes[option]) {
       poll.votes[option] = 1;
     } else {
